@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{MASTHEAD}} — {{DATE}}</title>
+<style>
+  @page { size: Letter; margin: 0.45in; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: #111; background: #fff; font: 10pt/1.35 Georgia, "Times New Roman", serif; }
+  header { text-align: center; border-bottom: 3px double #111; padding-bottom: 4pt; margin-bottom: 8pt; }
+  .masthead { font: 700 34pt/1 "Old English Text MT", "UnifrakturCook", Georgia, serif; letter-spacing: 0.5pt; margin: 0 0 4pt; }
+  .dateline { display: flex; justify-content: space-between; border-top: 1px solid #111; padding-top: 3pt;
+              font: 8pt/1.2 Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.6pt; }
+  .lead { border-bottom: 1px solid #111; padding-bottom: 8pt; margin-bottom: 8pt; }
+  .lead h1 { font: 700 22pt/1.1 Georgia, serif; margin: 0 0 4pt; }
+  .lead p { font-size: 11pt; margin: 0; }
+  .cols { display: grid; grid-template-columns: 1fr 1.4fr 1.2fr; gap: 0 14pt; }
+  .cols > section + section { border-left: 1px solid #999; padding-left: 14pt; }
+  h2 { font: 700 8pt/1 Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: 1pt;
+       border-bottom: 2px solid #111; padding-bottom: 2pt; margin: 0 0 6pt; }
+  h3 { font: 700 11pt/1.2 Georgia, serif; margin: 0 0 2pt; }
+  article { margin-bottom: 7pt; break-inside: avoid; }
+  article p { margin: 0; }
+  .by, .src { font: italic 8pt Helvetica, Arial, sans-serif; color: #444; }
+  ul { list-style: none; margin: 0 0 10pt; padding: 0; }
+  .schedule li { padding: 3pt 0; border-bottom: 1px dotted #999; }
+  .schedule b { display: inline-block; min-width: 34pt; font-family: Helvetica, Arial, sans-serif; }
+  .todo li::before { content: "\2610\00a0"; }
+  .todo li { padding: 2pt 0; }
+  footer { margin-top: 8pt; border-top: 1px solid #111; padding-top: 4pt; text-align: center; font-style: italic; }
+</style>
+</head>
+<body>
+<header>
+  <div class="masthead">{{MASTHEAD}}</div>
+  <div class="dateline"><span>{{DATE}}</span><span>{{EDITION}}</span><span>{{WEATHER}}</span></div>
+</header>
+<div class="lead">
+  <h1>{{LEAD_HEADLINE}}</h1>
+  <p>{{LEAD_BODY}}</p>
+</div>
+<div class="cols">
+  <section>
+    <h2>Today's Schedule</h2>
+    <ul class="schedule">{{SCHEDULE}}</ul>
+    <h2>To Do</h2>
+    <ul class="todo">{{TODO}}</ul>
+  </section>
+  <section>
+    <h2>From the Inbox</h2>
+    {{INBOX}}
+  </section>
+  <section>
+    <h2>The World</h2>
+    {{HEADLINES}}
+  </section>
+</div>
+<footer>{{QUOTE}}</footer>
+</body>
+</html>
