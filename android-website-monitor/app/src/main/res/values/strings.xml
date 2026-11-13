@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Website Monitor</string>
+    <string name="hint_url">Website URL (https://…)</string>
+    <string name="hint_keyword">Optional: text to watch for</string>
+    <string name="notify_on_change">Notify when page content changes</string>
+    <string name="start">Start monitoring</string>
+    <string name="stop">Stop</string>
+    <string name="check_now">Check now</string>
+    <string name="history">Recent checks</string>
+    <string name="channel_name">Website alerts</string>
+    <string name="channel_desc">Alerts when a monitored website goes down, recovers or changes</string>
+</resources>
