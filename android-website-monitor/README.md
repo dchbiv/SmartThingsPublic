@@ -7,6 +7,14 @@ notifies you when:
 - the page **content changes** (optional; compares a SHA-256 of the page)
 - a piece of **text you choose** appears on or disappears from the page (optional)
 
+- a **feed** (RSS/Atom) gets a **new item** or an item is cleared; the
+  notification lists the item titles
+
+The app starts with the Microsoft 365 status feed
+(`https://status.cloud.microsoft/api/feed/mac`, the incident feed behind
+status.cloud.microsoft) filled in. That feed is empty when nothing is wrong, and each
+active incident or advisory shows up as an item. You can enter any other URL instead.
+
 Enter the URL, optionally the text to watch for, and tap **Start monitoring**. The app
 keeps a log of recent checks. Tapping a notification opens the site in your browser.
 

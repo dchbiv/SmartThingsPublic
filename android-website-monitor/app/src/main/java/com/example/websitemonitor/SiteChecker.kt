@@ -19,6 +19,8 @@ data class CheckResult(
     val keywordFound: Boolean?,
     val responseMillis: Long,
     val error: String?,
+    /** Item titles if the response is an RSS/Atom feed, otherwise null. */
+    val feedItems: List<String>? = null,
 )
 
 object SiteChecker {
@@ -41,17 +43,23 @@ object SiteChecker {
             val stream = if (code >= 400) conn.errorStream else conn.inputStream
             val body = stream?.use { readLimited(it) } ?: ByteArray(0)
             val elapsed = SystemClock.elapsedRealtime() - start
+            val text = String(body, Charsets.UTF_8)
             val found = if (keyword.isBlank()) null
-            else String(body, Charsets.UTF_8).contains(keyword.trim(), ignoreCase = true)
+            else text.contains(keyword.trim(), ignoreCase = true)
+            val items = FeedParser.itemTitles(text)
             CheckResult(
                 url = url,
                 timeMillis = now,
                 up = code in 200..399,
                 httpCode = code,
-                contentHash = sha256(body),
+                // For feeds, hash only the item titles: build dates and other
+                // metadata change on every request and would look like changes.
+                contentHash = if (items != null) sha256(items.joinToString("\n").toByteArray())
+                else sha256(body),
                 keywordFound = found,
                 responseMillis = elapsed,
                 error = if (code >= 400) "HTTP $code" else null,
+                feedItems = items,
             )
         } catch (e: Exception) {
             CheckResult(

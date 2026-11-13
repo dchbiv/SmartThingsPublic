@@ -10,7 +10,7 @@ class Prefs(context: Context) {
         context.applicationContext.getSharedPreferences("monitor", Context.MODE_PRIVATE)
 
     var url: String
-        get() = raw.getString(KEY_URL, "") ?: ""
+        get() = raw.getString(KEY_URL, DEFAULT_URL) ?: ""
         set(v) = raw.edit { putString(KEY_URL, v) }
 
     var keyword: String
@@ -39,13 +39,15 @@ class Prefs(context: Context) {
                 keywordFound = if (kw.isNullOrEmpty()) null else kw.toBoolean(),
                 responseMillis = raw.getLong(KEY_LAST_RESPONSE_MS, 0),
                 error = raw.getString(KEY_LAST_ERROR, null),
+                feedItems = raw.getString(KEY_LAST_ITEMS, null)
+                    ?.split("\n")?.filter { it.isNotEmpty() },
             )
         }
         set(r) = raw.edit {
             if (r == null) {
                 listOf(
                     KEY_LAST_URL, KEY_LAST_TIME, KEY_LAST_UP, KEY_LAST_CODE, KEY_LAST_HASH,
-                    KEY_LAST_KEYWORD, KEY_LAST_RESPONSE_MS, KEY_LAST_ERROR,
+                    KEY_LAST_KEYWORD, KEY_LAST_RESPONSE_MS, KEY_LAST_ERROR, KEY_LAST_ITEMS,
                 ).forEach { remove(it) }
             } else {
                 putString(KEY_LAST_URL, r.url)
@@ -56,6 +58,7 @@ class Prefs(context: Context) {
                 putString(KEY_LAST_KEYWORD, r.keywordFound?.toString() ?: "")
                 putLong(KEY_LAST_RESPONSE_MS, r.responseMillis)
                 putString(KEY_LAST_ERROR, r.error)
+                putString(KEY_LAST_ITEMS, r.feedItems?.joinToString("\n"))
             }
         }
 
@@ -71,7 +74,10 @@ class Prefs(context: Context) {
     fun clearHistory() = raw.edit { remove(KEY_HISTORY) }
 
     companion object {
+        /** Microsoft 365 status page incident feed (RSS behind status.cloud.microsoft). */
+        const val DEFAULT_URL = "https://status.cloud.microsoft/api/feed/mac"
         private const val MAX_HISTORY = 100
+        private const val KEY_LAST_ITEMS = "last_items"
         private const val KEY_URL = "url"
         private const val KEY_KEYWORD = "keyword"
         private const val KEY_NOTIFY_CHANGE = "notify_change"

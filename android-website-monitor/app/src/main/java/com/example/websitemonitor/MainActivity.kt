@@ -124,6 +124,10 @@ class MainActivity : AppCompatActivity() {
             sb.append("\nStatus: ")
             if (last.up) sb.append("UP (HTTP ${last.httpCode}, ${last.responseMillis} ms)")
             else sb.append("DOWN (${last.error ?: "no response"})")
+            last.feedItems?.let { items ->
+                sb.append("\nFeed items: ").append(items.size)
+                items.take(10).forEach { sb.append("\n  • ").append(it) }
+            }
             last.keywordFound?.let {
                 sb.append("\nWatched text: ").append(if (it) "found" else "not found")
             }

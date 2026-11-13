@@ -29,6 +29,12 @@ class MonitorWorker(context: Context, params: WorkerParameters) :
         if (prev == null) {
             if (!result.up) {
                 Notifier.notify(ctx, ID_STATUS, "$host is DOWN", describe(result), url)
+            } else if (!result.feedItems.isNullOrEmpty()) {
+                // First check of a feed: report what is currently listed.
+                Notifier.notify(
+                    ctx, ID_CHANGE, "$host: ${result.feedItems.size} active item(s)",
+                    result.feedItems.joinToString("\n") { "• $it" }, url,
+                )
             }
         } else {
             if (prev.up && !result.up) {
@@ -37,7 +43,26 @@ class MonitorWorker(context: Context, params: WorkerParameters) :
                 Notifier.notify(ctx, ID_STATUS, "$host is back UP", describe(result), url)
             }
 
-            if (prefs.notifyOnChange && prev.up && result.up &&
+            val isFeed = result.feedItems != null && prev.feedItems != null
+            if (isFeed) {
+                val before = prev.feedItems!!.toSet()
+                val after = result.feedItems!!.toSet()
+                val added = result.feedItems.filter { it !in before }
+                val removed = prev.feedItems.filter { it !in after }
+                if (added.isNotEmpty()) {
+                    Notifier.notify(
+                        ctx, ID_CHANGE,
+                        if (added.size == 1) "$host: new update" else "$host: ${added.size} new updates",
+                        added.joinToString("\n") { "• $it" }, url,
+                    )
+                }
+                if (removed.isNotEmpty() && prefs.notifyOnChange) {
+                    Notifier.notify(
+                        ctx, ID_CLEARED, "$host: ${removed.size} item(s) cleared",
+                        removed.joinToString("\n") { "• $it" }, url,
+                    )
+                }
+            } else if (prefs.notifyOnChange && prev.up && result.up &&
                 prev.contentHash != null && result.contentHash != null &&
                 prev.contentHash != result.contentHash
             ) {
@@ -55,7 +80,11 @@ class MonitorWorker(context: Context, params: WorkerParameters) :
         // A failed request has no content hash; keep the last good one so a brief
         // outage isn't reported as a content change once the site recovers.
         val stored = if (!result.up && prev != null) {
-            result.copy(contentHash = prev.contentHash, keywordFound = prev.keywordFound)
+            result.copy(
+                contentHash = prev.contentHash,
+                keywordFound = prev.keywordFound,
+                feedItems = prev.feedItems,
+            )
         } else result
         prefs.last = stored
         prefs.addHistory(historyLine(result, prev))
@@ -70,6 +99,7 @@ class MonitorWorker(context: Context, params: WorkerParameters) :
     private fun historyLine(r: CheckResult, prev: CheckResult?): String {
         val time = SimpleDateFormat("MM-dd HH:mm", Locale.US).format(Date(r.timeMillis))
         val state = if (r.up) "UP  " else "DOWN"
+        val items = r.feedItems?.let { " items:${it.size}" } ?: ""
         val changed = if (r.up && prev?.contentHash != null && r.contentHash != null &&
             prev.contentHash != r.contentHash
         ) " changed" else ""
@@ -78,12 +108,13 @@ class MonitorWorker(context: Context, params: WorkerParameters) :
             false -> " text:missing"
             null -> ""
         }
-        return "$time $state ${describe(r)}$changed$kw"
+        return "$time $state ${describe(r)}$items$changed$kw"
     }
 
     companion object {
         private const val ID_STATUS = 1
         private const val ID_CHANGE = 2
         private const val ID_KEYWORD = 3
+        private const val ID_CLEARED = 4
     }
 }
